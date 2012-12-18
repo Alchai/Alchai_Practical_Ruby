@@ -1,0 +1,75 @@
+##*****************************************************************************************##
+## Ruby_Practical_Parser
+## This program was created to satisfy the 'coding practical' portion of
+## the requirements of Cloudspace's application process.
+#
+## The time spent (googling) coding and debugging was kept to a 90 minute maximum.
+#
+## The program is designed to take a raw email .txt file, and parse it for
+## relavent data. 
+#
+#
+## Often, in my industry experience, I've needed to take the header information and the body
+## of emails, and put them into respective fields in a database. Therefore, the relavent data
+## will consist of the To, From, Subject, Date, and Body of the email.
+#
+#
+## Original Author: Joshua Bush
+#
+#
+## Dec. 17th, 2012 - Rev. 0
+## ****************************************************************************************##
+
+
+## The simplest way I can think to do this is to read the file into a string, then parse that string
+## For the data that is deemed relevant.
+
+Email = File.open("/email.txt") {|f| f.read}  
+
+# Print the e-mail string to ensure it scanned in correctly.
+print(Email, "\n")
+
+#######################################################################
+## Create a set of regular expressions to match in the email string. ##
+#######################################################################
+
+## This is where RFC 2822 comes in handy - the spec says that the 
+## headers of an email MUST have a label in ascii that is followed by a colon.
+## This makes finding the most commond data simple.
+
+To = Email.match(/To:(.*)/)[1].strip #strips the whitespace around the (potential) match.
+From = Email.match(/From:(.*)/)[1].strip
+Subject = Email.match(/Subject:(.*)/)[1].strip
+Date = Email.match(/Date:(.*)/)[1].strip
+
+
+### Print the currently stored relavent data ###
+print "\n" *5, To, "\n", From, "\n", Subject, "\n", Date, "\n"
+
+## Assuming that the Body of text will be bounded by the "Boundary" and with 
+## some uncertainty regarding whether the e-mail is multipart.
+
+Boundary = Email.match(/boundary=(.*)/)[1].strip
+Boundary2 = "--" + Boundary #this just cleans things up a bit, and realistically can be wrapped in w/ better regex syntax.
+
+#Now, the email is split around the html or plain tex to get the body.
+
+EmailBits = Email.split(Boundary2)
+
+MetaData = EmailBits[0]
+
+PlainText = EmailBits[1]
+
+#Print the split data - Plaintext or HTML
+if(EmailBits.length > 2) 
+     EmailText = EmailBits[2]
+end
+
+print "\nEmail's Plain Text: \n", PlainText 
+
+
+
+if(EmailBits.length > 2)
+     print "\nEmail's HTML Text: \n", EmailText
+end
+
